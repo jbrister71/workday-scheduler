@@ -1,6 +1,8 @@
+var currentTime = moment();
+
 var displayCalendar = function() {
-    var currentTime = moment().format("dddd, MMMM Do YYYY");
-    $("#currentDay").text(currentTime);
+    var currentDate = moment().format("dddd, MMMM Do YYYY");
+    $("#currentDay").text(currentDate);
 
     createCalendarElements();
 }
@@ -23,10 +25,13 @@ var createCalendarElements = function() {
 
         var calendarCenter = $("<div></div>");
         calendarCenter.addClass("calendar-center col-10 mb-1");
-        getTimeColor();
+        getTimeColor(calendarCenter, i+9);
 
         var calendarRight = $("<div></div>");
-        calendarRight.addClass("calendar-right col-1 mb-1 bg-info rounded-right");
+        calendarRight.addClass("calendar-right col-1 mb-1 bg-info rounded-right text-light d-flex align-items-center justify-content-center");
+        var icon = $("<span></span>");
+        icon.addClass("oi oi-document");
+        calendarRight.append(icon);
 
         calendarRow.append(calendarLeft);
         calendarRow.append(calendarCenter);
@@ -35,6 +40,20 @@ var createCalendarElements = function() {
         calendar = $(".container");
         calendar.append(calendarRow);
     }
+}
+
+getTimeColor = function(calendarCenter, rowTime) {
+    if(rowTime < currentTime.hour()) {
+        calendarCenter.addClass("bg-secondary");
+    }
+    else if (rowTime > currentTime.hour()) {
+        calendarCenter.addClass("bg-success");
+    }
+    else {
+        calendarCenter.addClass("bg-danger");
+    }
+
+    calendarCenter.addClass("text-light");
 }
 
 displayCalendar();

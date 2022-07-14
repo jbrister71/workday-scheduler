@@ -21,14 +21,18 @@ var createCalendarElements = function() {
         else {
             calendarLeft.text((i-3)+ "PM");
         }
-        calendarLeft.addClass("calendar-left col-1 border-top mb-1");
+        calendarLeft.addClass("calendar-left hour col-1 mb-1");
 
+        var hourClass = "hour-" + i;
         var calendarCenter = $("<div></div>");
-        calendarCenter.addClass("calendar-center col-10 mb-1");
+        calendarCenter.addClass("calendar-center col-10 mb-1" + hourClass);
+        var textContainer = $("<p>");
+        textContainer.addClass("text-container");
+        calendarCenter.append(textContainer);
         getTimeColor(calendarCenter, i+9);
 
         var calendarRight = $("<div></div>");
-        calendarRight.addClass("calendar-right col-1 mb-1 bg-info rounded-right text-light d-flex align-items-center justify-content-center");
+        calendarRight.addClass("calendar-right col-1 saveBtn d-flex align-items-center justify-content-center");
         var icon = $("<span></span>");
         icon.addClass("oi oi-document");
         calendarRight.append(icon);
@@ -42,18 +46,46 @@ var createCalendarElements = function() {
     }
 }
 
-getTimeColor = function(calendarCenter, rowTime) {
+var getTimeColor = function(calendarCenter, rowTime) {
     if(rowTime < currentTime.hour()) {
-        calendarCenter.addClass("bg-secondary");
+        calendarCenter.addClass("past");
     }
     else if (rowTime > currentTime.hour()) {
-        calendarCenter.addClass("bg-success");
+        calendarCenter.addClass("future");
     }
     else {
-        calendarCenter.addClass("bg-danger");
+        calendarCenter.addClass("present");
     }
 
     calendarCenter.addClass("text-light");
 }
+
+$(".container").on("click", ".calendar-center", function() {
+    console.log($(this).find("p"));
+
+    var textElement = $(this).find("p");
+    var text = $(textElement)
+        .text()
+        .trim();
+
+    var textInput = $("<textarea>")
+        .addClass("text-form")
+        .val(text);
+
+    textElement.replaceWith(textInput);
+    textInput.trigger("focus");
+});
+
+$(".container").on("blur", "textarea", function() {
+    var text = $(this)
+        .val()
+        .trim();
+
+    var textContainer = $("<p>")
+        .addClass("text-container justify-contents-center align-items-center")
+        .text(text);
+
+    $(this).replaceWith(textContainer);
+});
 
 displayCalendar();

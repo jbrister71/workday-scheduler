@@ -63,9 +63,9 @@ var getTimeColor = function(calendarCenter, rowTime) {
 }
 
 $(".container").on("click", ".calendar-center", function() {
-    console.log($(this).find("p"));
+    console.log($(this).find(".text-container"));
 
-    var textElement = $(this).find("p");
+    var textElement = $(this).children(".text-container");
     var text = $(textElement)
         .text()
         .trim();
@@ -84,7 +84,7 @@ $(".container").on("blur", "textarea", function() {
         .trim();
 
     var textContainer = $("<p>")
-        .addClass("text-container justify-contents-center align-items-center")
+        .addClass("text-container")
         .text(text);
 
     $(this).replaceWith(textContainer);
@@ -93,16 +93,35 @@ $(".container").on("blur", "textarea", function() {
 $(".container").on("click", ".calendar-right", function() {
     var calendarCenter = $(this).parent().find(".calendar-center");
     var textContainer = calendarCenter.find("p");
+    var hourOccupied = false;
+    var occupiedObj;
 
     console.log(calendarCenter.attr("hour"));
+    
+    if(savedTasks){
+        for(var i = 0; i < savedTasks.length; i++) {
+
+            if(savedTasks[i].hour === calendarCenter.attr("hour")) {
+                hourOccupied = true;
+                occupiedObj = savedTasks[i];
+            }
+        }
+    }
 
     if(textContainer.text()) {
-        var taskObj = {
-            text: textContainer.text(),
-            hour: calendarCenter.attr("hour")
+        if(hourOccupied) {
+            console.log("made it here");
+            occupiedObj.text = textContainer.text();
         }
-
-        savedTasks.push(taskObj);
+        else {
+            if(savedTasks) {
+                var taskObj = {
+                    text: textContainer.text(),
+                    hour: calendarCenter.attr("hour")
+                }
+                savedTasks.push(taskObj);
+            }
+        }
         localStorage.setItem("tasks", JSON.stringify(savedTasks));
     }
 });
@@ -110,15 +129,20 @@ $(".container").on("click", ".calendar-right", function() {
 var loadTasks = function() {
     savedTasks = JSON.parse(localStorage.getItem("tasks"));
 
-    console.log("here");
+    if(!savedTasks) {
+        savedTasks = [];
+    }
 
-    for(var i = 0; i < savedTasks.length; i++) {
-        console.log("got here");
-        var calString = ".hour-" + savedTasks[i].hour;
-        console.log(calString);
-        var calendarElement = $(calString);
-        calendarElement.text(savedTasks[i].text);
-        console.log(calendarElement);
+    console.log("here");
+    if(savedTasks){
+        for(var i = 0; i < savedTasks.length; i++) {
+            console.log("got here");
+            var calString = ".hour-" + savedTasks[i].hour;
+            console.log(calString);
+            var calendarElement = $(calString).find("p");
+            calendarElement.text(savedTasks[i].text);
+            console.log(calendarElement);
+        }
     }
 };
 

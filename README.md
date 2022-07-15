@@ -9,10 +9,10 @@ Events will be saved until the user wishes to change them.
 HTML, CSS, and Javascript
 
 ## Screenshot of application
-Placeholder
+[Screenshot of application](./assets/images/screenshot.png)
 
 ## Link to application
-Placeholder
+[Link to application](https://jbrister71.github.io/workday-scheduler/)
 
 ## Contribution
 Javascript written by Jacob Brister

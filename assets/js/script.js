@@ -1,6 +1,9 @@
+var currentTime = moment();
+var savedTasks = [];
+
 var displayCalendar = function() {
-    var currentTime = moment().format("dddd, MMMM Do YYYY");
-    $("#currentDay").text(currentTime);
+    var currentDate = moment().format("dddd, MMMM Do YYYY");
+    $("#currentDay").text(currentDate);
 
     createCalendarElements();
 }
@@ -19,14 +22,22 @@ var createCalendarElements = function() {
         else {
             calendarLeft.text((i-3)+ "PM");
         }
-        calendarLeft.addClass("calendar-left col-1 border-top mb-1");
+        calendarLeft.addClass("calendar-left hour col-1 mb-1");
 
+        var hourId = i;
         var calendarCenter = $("<div></div>");
-        calendarCenter.addClass("calendar-center col-10 mb-1");
-        getTimeColor();
+        calendarCenter.addClass("calendar-center col-10 mb-1 hour-" + hourId);
+        calendarCenter.attr("hour", hourId);
+        var textContainer = $("<p>");
+        textContainer.addClass("text-container");
+        calendarCenter.append(textContainer);
+        getTimeColor(calendarCenter, i+9);
 
         var calendarRight = $("<div></div>");
-        calendarRight.addClass("calendar-right col-1 mb-1 bg-info rounded-right");
+        calendarRight.addClass("calendar-right col-1 saveBtn mb-1 d-flex align-items-center justify-content-center");
+        var icon = $("<i></i>");
+        icon.addClass("oi oi-document");
+        calendarRight.append(icon);
 
         calendarRow.append(calendarLeft);
         calendarRow.append(calendarCenter);
@@ -37,4 +48,104 @@ var createCalendarElements = function() {
     }
 }
 
+var getTimeColor = function(calendarCenter, rowTime) {
+    if(rowTime < currentTime.hour()) {
+        calendarCenter.addClass("past");
+    }
+    else if (rowTime > currentTime.hour()) {
+        calendarCenter.addClass("future");
+    }
+    else {
+        calendarCenter.addClass("present");
+    }
+
+    calendarCenter.addClass("text-light");
+}
+
+$(".container").on("click", ".calendar-center", function() {
+    console.log($(this).find(".text-container"));
+
+    var textElement = $(this).children(".text-container");
+    var text = $(textElement)
+        .text()
+        .trim();
+
+    var textInput = $("<textarea>")
+        .addClass("text-form")
+        .val(text);
+
+    textElement.replaceWith(textInput);
+    textInput.trigger("focus");
+});
+
+$(".container").on("blur", "textarea", function() {
+    var text = $(this)
+        .val()
+        .trim();
+
+    var textContainer = $("<p>")
+        .addClass("text-container")
+        .text(text);
+
+    $(this).replaceWith(textContainer);
+});
+
+$(".container").on("click", ".calendar-right", function() {
+    var calendarCenter = $(this).parent().find(".calendar-center");
+    var textContainer = calendarCenter.find("p");
+    var hourOccupied = false;
+    var occupiedObj;
+
+    console.log(calendarCenter.attr("hour"));
+    
+    if(savedTasks){
+        for(var i = 0; i < savedTasks.length; i++) {
+
+            if(savedTasks[i].hour === calendarCenter.attr("hour")) {
+                hourOccupied = true;
+                occupiedObj = savedTasks[i];
+            }
+        }
+    }
+
+    if(textContainer.text()) {
+        if(hourOccupied) {
+            console.log("made it here");
+            occupiedObj.text = textContainer.text();
+        }
+        else {
+            if(savedTasks) {
+                var taskObj = {
+                    text: textContainer.text(),
+                    hour: calendarCenter.attr("hour")
+                }
+                savedTasks.push(taskObj);
+            }
+        }
+        localStorage.setItem("tasks", JSON.stringify(savedTasks));
+    }
+});
+
+var loadTasks = function() {
+    savedTasks = JSON.parse(localStorage.getItem("tasks"));
+
+    if(!savedTasks) {
+        savedTasks = [];
+    }
+
+    console.log("here");
+    if(savedTasks){
+        for(var i = 0; i < savedTasks.length; i++) {
+            console.log("got here");
+            var calString = ".hour-" + savedTasks[i].hour;
+            console.log(calString);
+            var calendarElement = $(calString).find("p");
+            calendarElement.text(savedTasks[i].text);
+            console.log(calendarElement);
+        }
+    }
+};
+
 displayCalendar();
+
+loadTasks();
